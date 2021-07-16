@@ -357,11 +357,6 @@
               <FilePath>.\lib\S_TouchKeyCFG.C</FilePath>
             </File>
             <File>
-              <FileName>SC93F8X3X_HighSensitive_Lib_T2_V1.1.0.LIB</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\lib\SC93F8X3X_HighSensitive_Lib_T2_V1.1.0.LIB</FilePath>
-            </File>
-            <File>
               <FileName>leddrive.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\leddrive.c</FilePath>
@@ -390,6 +385,21 @@
               <FileName>ad.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\ad.c</FilePath>
+            </File>
+            <File>
+              <FileName>SC93F8X3X_HighSensitive_Lib_T1_V1.1.0.LIB</FileName>
+              <FileType>4</FileType>
+              <FilePath>.\lib\SC93F8X3X_HighSensitive_Lib_T1_V1.1.0.LIB</FilePath>
+            </File>
+            <File>
+              <FileName>outload.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\outload.c</FilePath>
+            </File>
+            <File>
+              <FileName>iap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\iap.c</FilePath>
             </File>
           </Files>
         </Group>

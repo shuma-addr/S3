@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   OUTLOAD                                                               12/20/2020 16:52:20 PAGE 1   
+C51 COMPILER V9.00   OUTLOAD                                                               07/17/2021 06:27:50 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE OUTLOAD
@@ -26,7 +26,7 @@ line level    source
   17          
   18          #define CLOSE 0    //风扇关
   19          #define HALF 1    //风扇半功率输出
-  20          #define ALL 2    //风扇全功率输出
+  20          #define ALL 222  //风扇全功率输出
   21          
   22          
   23          
@@ -62,7 +62,7 @@ line level    source
   53          void OutputBf(unsigned char temp)
   54          {
   55   1              switch (temp)
-C51 COMPILER V9.00   OUTLOAD                                                               12/20/2020 16:52:20 PAGE 2   
+C51 COMPILER V9.00   OUTLOAD                                                               07/17/2021 06:27:50 PAGE 2   
 
   56   1              {
   57   2                      case TEMPADD:  //温度处于上升状态
@@ -126,7 +126,7 @@ line level    source
  115   2                      {}                              
  116   2              }
  117   1      }
-C51 COMPILER V9.00   OUTLOAD                                                               12/20/2020 16:52:20 PAGE 3   
+C51 COMPILER V9.00   OUTLOAD                                                               07/17/2021 06:27:50 PAGE 3   
 
  118          void Relaywork()
  119          {
@@ -190,7 +190,7 @@ line level    source
  177   1      
  178   1              
  179   1              OutputBf(s_temp_trend); //根据当前的温度趋势，判定是制冷还是制热
-C51 COMPILER V9.00   OUTLOAD                                                               12/20/2020 16:52:20 PAGE 4   
+C51 COMPILER V9.00   OUTLOAD                                                               07/17/2021 06:27:50 PAGE 4   
 
  180   1      
  181   1      
@@ -231,7 +231,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    401    ----
+   CODE SIZE        =    402    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

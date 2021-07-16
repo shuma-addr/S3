@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 1   
+C51 COMPILER V9.00   MAIN                                                                  07/17/2021 06:23:12 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   53          void TimerInit(void)
   54          {
   55   1              TMCON = (TMCON&0xfe)|(0<<0);            //bit0: 0为FOSC/12,1为FOSO
-C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 2   
+C51 COMPILER V9.00   MAIN                                                                  07/17/2021 06:23:12 PAGE 2   
 
   56   1      
   57   1              TMOD = TMOD&0xf0;                                       //设置定时0，工作方式0
@@ -126,7 +126,7 @@ line level    source
  115   2                      P04 = ~P04;
  116   2              }       
  117   1              
-C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 3   
+C51 COMPILER V9.00   MAIN                                                                  07/17/2021 06:23:12 PAGE 3   
 
  118   1              r_cnt5++;
  119   1              if(r_cnt5 >= 2)
@@ -190,7 +190,7 @@ line level    source
  177   4                                      cnt_set++;
  178   4                                      if(cnt_set>=250)
  179   4                                      {
-C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 4   
+C51 COMPILER V9.00   MAIN                                                                  07/17/2021 06:23:12 PAGE 4   
 
  180   5                                              cnt_set=0;
  181   5                                              f_settemp=0;
@@ -254,7 +254,7 @@ line level    source
  239   1      
  240   1      
  241   1              if(IAPRead(2) == EEP_FLAG)
-C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 5   
+C51 COMPILER V9.00   MAIN                                                                  07/17/2021 06:23:12 PAGE 5   
 
  242   1              {
  243   2                      Settmp=IAPRead(0);//25;
@@ -318,7 +318,7 @@ line level    source
  301   3      //                      uu_1=-9;
  302   3                      }
  303   2              //      ADCCON &= ~(0X10);
-C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 6   
+C51 COMPILER V9.00   MAIN                                                                  07/17/2021 06:23:12 PAGE 6   
 
  304   2              
  305   2                        
