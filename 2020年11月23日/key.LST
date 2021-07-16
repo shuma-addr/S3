@@ -1,0 +1,680 @@
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN key.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE key.C BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "h\SC93F843X_C.H"      
+   2          #include "h\data_type.h"
+   3          #include "lib\SensorMethod.h"
+   4          #include "config.h"
+   5          
+   6          bit fsg_keynocol=0;
+   7          
+   8          #define K1_num  1
+   9          #define K2_num  2
+  10          #define K3_num  3
+  11          #define K4_num  4
+  12          #define K5_num  5
+  13          #define K6_num  6
+  14          #define K7_num  7
+  15          #define K8_num  8
+  16          #define K9_num  9
+  17          #define K10_num         10
+  18          #define K11_num         11
+  19          #define K12_num         12
+  20          #define K3K4_num        13
+  21          
+  22          //#define TOUCH_TIME  100  //长按时间
+  23          //#define FAST_TIME     4    //快进时间
+  24          
+  25          #define TOUCH_TIME  150  //触碰3秒，算长按键
+  26          #define FAST_TIME       5        //快进时间  100ms
+  27          #define MAX_C  65
+  28          #define MIN_C 0
+  29          #define MAX_H  149
+  30          #define MIN_H 32
+  31          
+  32          
+  33          
+  34          
+  35          static unsigned char keyram,keyreg,keynum; //这里定义的变量只在3个函数中使用
+  36          static bit bit_k1=0;
+  37          static unsigned char k1_cnt=0;
+  38          static bit bit_k2=0;
+  39          static unsigned char k2_cnt=0;
+  40          //static bit bit_k3=0;
+  41          //static unsigned char k3_cnt=0;
+  42          //static bit bit_k4=0;
+  43          //static unsigned char k4_cnt=0;
+  44          static bit bit_k3k4=0;
+  45          static unsigned char k3k4_cnt=0;        
+  46          static bit bit_k3, bit_k3_L;
+  47          static unsigned char k3_cnt=0;
+  48          static bit bit_k4, bit_k4_L;
+  49          static unsigned char k4_cnt=0;
+  50          xdata unsigned char r_K3K4used=0;
+  51          xdata unsigned char cnt_K3K4used=0;     
+  52          
+  53          
+  54          unsigned char   bdata  keyflag_1;
+  55          sbit    shortkeyk1            = keyflag_1 ^0;
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 2   
+
+  56          sbit    shortkeyk2            = keyflag_1 ^1;
+  57          sbit    shortkeyk3           = keyflag_1 ^2;
+  58          sbit    shortkeyk4           = keyflag_1 ^3;
+  59          sbit    shortkeyk5        = keyflag_1 ^4;  //设置工作时间
+  60          sbit    shortkeyk6         = keyflag_1 ^5;
+  61          sbit    shortkeyk7           = keyflag_1 ^6;
+  62          sbit    shortkeyk8            = keyflag_1 ^7;
+  63          
+  64          unsigned char   bdata  keyflag_2;
+  65          sbit    shortkeyk9            = keyflag_2 ^0;
+  66          sbit    shortkeyk10            = keyflag_2 ^1;
+  67          sbit    shortkeyk11           = keyflag_2 ^2;
+  68          sbit    longkeyk1           = keyflag_2 ^3;
+  69          sbit    longkeyk3k4        = keyflag_2 ^4;  //设置工作时间
+  70          sbit    longkeyk4         = keyflag_2 ^5;
+  71          sbit    longkeyk3           = keyflag_2 ^6;
+  72          sbit    longkeyk2            = keyflag_2 ^7;
+  73          
+  74          //void CloseAllLed(void)
+  75          //{
+  76          //               led_delay=0;   
+  77          //               led_lamp=0;   
+  78          //               led_power=0;   
+  79          //               led_high=0;    
+  80          //               led_low=0;  
+  81          //}
+  82          INT32U exKeyValueFlag = 0;              //当前轮按键标志
+  83          
+  84          bit k3k4isdown()
+  85          {
+  86   1              if(k3_cnt|k4_cnt)
+  87   1                      return(1);
+  88   1              else
+  89   1                      return(0);
+  90   1      }
+  91          
+  92          void Key_Add(void)
+  93          {
+  94   1              if(rsg_show_H)
+  95   1              {
+  96   2                      Settmp++;
+  97   2                      if(Settmp>MAX_H)
+  98   2                              Settmp=MAX_H;   
+  99   2              }
+ 100   1              else
+ 101   1              {
+ 102   2                      Settmp++;
+ 103   2                      if(Settmp>MAX_C)
+ 104   2                              Settmp=MAX_C;
+ 105   2              }
+ 106   1              ClearSetTimeCount();    
+ 107   1      }
+ 108          void Key_Sub(void)
+ 109          {
+ 110   1              if(rsg_show_H)
+ 111   1              {
+ 112   2      //              Settmp--;
+ 113   2      //              if(Settmp < MIN_H)
+ 114   2      //                      Settmp = MIN_H; 
+ 115   2                      if(Settmp>MIN_H)
+ 116   2                              Settmp--;
+ 117   2                      else
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 3   
+
+ 118   2                              Settmp=MIN_H;   
+ 119   2              }
+ 120   1              else
+ 121   1              {
+ 122   2                      if(Settmp>MIN_C)
+ 123   2                              Settmp--;
+ 124   2                      else
+ 125   2                              Settmp=MIN_C;
+ 126   2      //              if(Settmp < MIN_C)
+ 127   2      //                      Settmp = MIN_C;
+ 128   2              }
+ 129   1      
+ 130   1              ClearSetTimeCount();
+ 131   1      }
+ 132          void BuzWork(unsigned char temp)
+ 133          {
+ 134   1              if(temp==1)
+ 135   1              {
+ 136   2                      Delaybuzz=15;
+ 137   2              }
+ 138   1      }
+ 139          int TurnToCenti(int temp)////摄氏度 = (华氏度 - 32) ÷ 1.8
+ 140          {
+ 141   1              int temp_1;
+ 142   1              temp_1 = ((temp-32)*5)/9;
+ 143   1      //      if(temp_1<MIN_C)
+ 144   1      //              temp_1=MIN_C;
+ 145   1      //      if(temp_1>MAX_C)
+ 146   1      //              temp_1=MAX_C;
+ 147   1              return(temp_1); 
+ 148   1      }
+ 149          int TurnToFahren(int temp)//华氏度 = 32+ 摄氏度 × 1.8  摄氏2度等同于华氏36度   摄氏60度等同于华氏140
+ 150          {
+ 151   1              int temp_1;
+ 152   1              temp_1 = ((temp*9)/5)+32;
+ 153   1      //      if(temp_1<MIN_H)
+ 154   1      //              temp_1=MIN_H;
+ 155   1      //      if(temp_1>MAX_H)
+ 156   1      //              temp_1=MAX_H;
+ 157   1              return(temp_1); 
+ 158   1      }
+ 159          
+ 160          void Keyinit()
+ 161          {
+ 162   1              TouchKeyInit();
+ 163   1              r_K3K4used=0;
+ 164   1              cnt_K3K4used=0; 
+ 165   1      }
+ 166          /**************************************************
+ 167          *函数名称：void  Sys_Scan(void) 
+ 168          *函数功能：扫描TK和显示
+ 169          *入口参数：void
+ 170          *出口参数：void  
+ 171          **************************************************/
+ 172          void Sys_Scan(void)
+ 173          {                               
+ 174   1      //      if(SOCAPI_TouchKeyStatus&0x40)          //当按键个数大于8个时，要判断半轮标志是否被置起，然后启动下半轮
+ 175   1      //      {
+ 176   1      //              SOCAPI_TouchKeyStatus &= 0xBf;  // 清除标志位， 需要外部清除。
+ 177   1      //              TouchKeyRestart();                              //启动下一轮转换
+ 178   1      //      }
+ 179   1              if(SOCAPI_TouchKeyStatus&0x80)      //重要步骤2:  触摸键扫描一轮标志，是否调用TouchKeyScan()一定要根据此标
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 4   
+
+             -志位置起后
+ 180   1               {                                                                                                                                              
+ 181   2                      SOCAPI_TouchKeyStatus &= 0x7f;  //重要步骤3: 清除标志位， 需要外部清除。                                                                                                            
+ 182   2                      exKeyValueFlag = TouchKeyScan();//按键数据处理函数    
+ 183   2                      TouchKeyRestart();                              //启动下一轮转换                                                                                                                                                                                                                                                                        
+ 184   2              }                          
+ 185   1      }
+ 186          void readkey(void)
+ 187          {
+ 188   1              unsigned long temp;
+ 189   1              Sys_Scan();
+ 190   1              temp=0;  
+ 191   1              temp=exKeyValueFlag;//读取按键值
+ 192   1              
+ 193   1              switch(temp)
+ 194   1              {
+ 195   2                        case 0x00000001:  //TK0        k2
+ 196   2                                      keyreg=K2_num;  
+ 197   2      //                              Led_value = 10; 
+ 198   2      //                              ShowTmp(0);
+ 199   2      //                              CloseAllLed();
+ 200   2      //                              led_high=1;
+ 201   2                                      break;                          
+ 202   2                        case 0x00000002:  //TK1         k1
+ 203   2                                      keyreg=K1_num;
+ 204   2      //                              ShowTmp(1);     
+ 205   2      //                              Led_value = 7;
+ 206   2      //                              CloseAllLed();
+ 207   2      //                          led_low=1;
+ 208   2                                      break;
+ 209   2                       case 0x00000004:        //TK2     k4
+ 210   2                                      keyreg=K4_num;
+ 211   2      //                              ShowTmp(2);
+ 212   2      //                              Led_value = 8;
+ 213   2      //                              CloseAllLed();
+ 214   2      //                                 led_power=1;
+ 215   2                                      break;
+ 216   2                        case 0x00000008:       //TK3     k3
+ 217   2                                      keyreg=K3_num;
+ 218   2      //                              ShowTmp(3);
+ 219   2      //                              Led_value = 9;
+ 220   2      //                              CloseAllLed();
+ 221   2      //                              led_lamp=1;
+ 222   2                                      break;
+ 223   2                        case 0x0000000c:   //TK4+TK3
+ 224   2                                      keyreg=K3K4_num;
+ 225   2      //                              Led_value = 1;
+ 226   2      //                              CloseAllLed();
+ 227   2      //                               led_delay=1; 
+ 228   2                                      break;
+ 229   2      //                case 0x00000020:   //TK5
+ 230   2      //                              keyreg=K2_num;
+ 231   2      //                              Led_value = 2;
+ 232   2      ////                            CloseAllLed();
+ 233   2      ////                             led_delay=1; 
+ 234   2      //                              break;
+ 235   2      //                case 0x00000100:  //TK8
+ 236   2      //                              keyreg=K3_num;
+ 237   2      //                              Led_value = 3;
+ 238   2      ////                            CloseAllLed();
+ 239   2      ////                             led_delay=1; 
+ 240   2      //                              break;
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 5   
+
+ 241   2      //                case 0x00000200:  //TK9
+ 242   2      //                              keyreg=K4_num;
+ 243   2      //                              Led_value = 4;
+ 244   2      ////                            CloseAllLed();
+ 245   2      ////                             led_delay=1; 
+ 246   2      //                              break;  
+ 247   2      //                case 0x00001000:   //TK12
+ 248   2      //                              keyreg=K5_num;
+ 249   2      //                              Led_value = 5;
+ 250   2      ////                            CloseAllLed();
+ 251   2      ////                             led_delay=1; 
+ 252   2      //                              break;  
+ 253   2      //                case 0x00002000:  //TK13
+ 254   2      //                              keyreg=K6_num;
+ 255   2      //                              Led_value = 6;
+ 256   2      ////                            CloseAllLed();
+ 257   2      ////                             led_delay=1; 
+ 258   2      //                              break;
+ 259   2      //                case 0x00004000:  //TK14
+ 260   2      //                              keyreg=K12_num;
+ 261   2      //                              Led_value = 12;
+ 262   2      ////                            CloseAllLed();
+ 263   2      ////                             led_delay=1; 
+ 264   2      //                              break;  
+ 265   2      //                case 0x00008000:  //TK15
+ 266   2      //                              keyreg=K11_num;
+ 267   2      //                              Led_value = 11;
+ 268   2      ////                            CloseAllLed();
+ 269   2      ////                             led_delay=1; 
+ 270   2      //                              break;                                                  
+ 271   2                        default:      
+ 272   2                                      keyreg=0;
+ 273   2                                              break;
+ 274   2              }       
+ 275   1      }
+ 276          void keyImplement(void)
+ 277          {
+ 278   1              if(keyram==K1_num )  // 
+ 279   1              {       
+ 280   2      //              shortkeyk1=1;
+ 281   2                      return;
+ 282   2              }
+ 283   1              if(keyram==K2_num )   // 
+ 284   1              {       
+ 285   2      //              shortkeyk2=1;
+ 286   2                      return;
+ 287   2              }
+ 288   1              if(keyram==K3_num )   // 
+ 289   1              {
+ 290   2      //              shortkeyk3=1;
+ 291   2                      return;
+ 292   2              }
+ 293   1              if(keyram==K4_num )   //
+ 294   1              {       
+ 295   2      //              shortkeyk4=1;
+ 296   2                      return;
+ 297   2              }
+ 298   1      //      if(keyram==K5_num )   //
+ 299   1      //      {       
+ 300   1      //              shortkeyk5=1;
+ 301   1      //              return;
+ 302   1      //      }
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 6   
+
+ 303   1      }
+ 304          void keydebouce(void)           //按键消抖
+ 305          {
+ 306   1              readkey();     //My_keydata送keyreg
+ 307   1              keynum++;          //扫描次数加1
+ 308   1              switch(keynum)
+ 309   1              {
+ 310   2                      case 1:
+ 311   2                      if(keyreg==0) {keynum=0;return;} 
+ 312   2                      keyram=keyreg;
+ 313   2                      return;    
+ 314   2                      case 2:
+ 315   2                      if(keyreg==0) {keynum=0;return;}
+ 316   2                      keyram=keyreg;        
+ 317   2                      return;                         
+ 318   2                      case 3:
+ 319   2                      if(keyram!=keyreg) {keyram=0;keynum=0;return;}
+ 320   2                      keyImplement();      //按键执行
+ 321   2                      return;
+ 322   2                      case 4:
+ 323   2                      if(keyreg==0){return;}
+ 324   2      
+ 325   2                      if(keyreg==K1_num)
+ 326   2                      {
+ 327   3                              if(bit_k1==0)
+ 328   3                              {
+ 329   4                                      k1_cnt++;
+ 330   4                                      if(k1_cnt>=TOUCH_TIME)
+ 331   4                                      {
+ 332   5                                              k1_cnt=0;
+ 333   5                                              bit_k1=1;
+ 334   5                                              longkeyk1=1;                    
+ 335   5                                      }       
+ 336   4                              }       
+ 337   3                      }
+ 338   2      
+ 339   2                      if(keyreg==K2_num)
+ 340   2                      {
+ 341   3                              if(bit_k2==0)
+ 342   3                              {
+ 343   4                                      k2_cnt++;
+ 344   4                                      if(k2_cnt>=TOUCH_TIME)
+ 345   4                                      {
+ 346   5                                              k2_cnt=0;
+ 347   5                                              bit_k2=1;
+ 348   5                                              longkeyk2=1;                    
+ 349   5                                      }       
+ 350   4                              }       
+ 351   3                      }
+ 352   2      
+ 353   2                      if(keyreg==K3_num)
+ 354   2                      {
+ 355   3                              if(bit_k3==0)
+ 356   3                              {
+ 357   4                                      k3_cnt++;
+ 358   4                                      if(k3_cnt >= TOUCH_TIME )
+ 359   4                                      {
+ 360   5                                              k3_cnt =  0;
+ 361   5                                              bit_k3=1;
+ 362   5                                              longkeyk3=1;
+ 363   5                                              bit_k3_L=1;
+ 364   5                                      }
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 7   
+
+ 365   4                              }
+ 366   3                              else
+ 367   3                              {
+ 368   4                                      bit_k3_L=1;     //已 长 按       防长按后，再一个短按
+ 369   4                                      k3_cnt++;
+ 370   4                                      if(k3_cnt >= FAST_TIME)//快进
+ 371   4                                      {
+ 372   5                                              k3_cnt=0;
+ 373   5                                              longkeyk3=1;
+ 374   5                                              fsg_keynocol=1;
+ 375   5                                      }                                       
+ 376   4                              }
+ 377   3                      }
+ 378   2                      if(keyreg==K4_num)
+ 379   2                      {
+ 380   3                              if(bit_k4==0)
+ 381   3                              {
+ 382   4                                      k4_cnt++;
+ 383   4                                      if(k4_cnt >= TOUCH_TIME )
+ 384   4                                      {
+ 385   5                                              k4_cnt =  0;
+ 386   5                                              bit_k4=1;
+ 387   5                                              longkeyk4=1;
+ 388   5                                              bit_k4_L=1;
+ 389   5                                      }
+ 390   4                              }
+ 391   3                              else
+ 392   3                              {
+ 393   4                                      bit_k4_L=1;     //已 长 按       防长按后，再一个短按
+ 394   4                                      k4_cnt++;
+ 395   4                                      if(k4_cnt >= FAST_TIME)//快进
+ 396   4                                      {
+ 397   5                                              k4_cnt=0;
+ 398   5                                              longkeyk4=1;
+ 399   5                                              fsg_keynocol=1;
+ 400   5                                      }                                       
+ 401   4                              }
+ 402   3                       }
+ 403   2                      if(keyreg==K3K4_num )
+ 404   2                      {
+ 405   3                              if(bit_k3k4==0)
+ 406   3                              {
+ 407   4                                      k3k4_cnt++;
+ 408   4                                      if(k3k4_cnt>=TOUCH_TIME)
+ 409   4                                      {
+ 410   5                                              k3k4_cnt=0;
+ 411   5                                              bit_k3k4=1;
+ 412   5                                              longkeyk3k4=1;
+ 413   5                                      }       
+ 414   4                              }
+ 415   3                              r_K3K4used=1;
+ 416   3                              cnt_K3K4used=0;         
+ 417   3                      }
+ 418   2                      return;
+ 419   2                      case 5:
+ 420   2                      if(keyreg==0)
+ 421   2                      {
+ 422   3                              if(  (k1_cnt<TOUCH_TIME)  &  (k1_cnt>0)  )
+ 423   3                                      shortkeyk1=1;
+ 424   3      
+ 425   3                              if(  (k2_cnt<TOUCH_TIME)  &  (k2_cnt>0)  )
+ 426   3                                      shortkeyk2=1;
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 8   
+
+ 427   3      
+ 428   3                              if(!bit_k3_L)
+ 429   3                              {
+ 430   4                                      if((k3_cnt<TOUCH_TIME) && (k3_cnt>0))      //
+ 431   4                                      {
+ 432   5                                              shortkeyk3=1;
+ 433   5                                      }
+ 434   4                              }
+ 435   3      
+ 436   3                              if(!bit_k4_L)
+ 437   3                              {
+ 438   4                                      if((k4_cnt<TOUCH_TIME) && (k4_cnt>0))      //
+ 439   4                                      {
+ 440   5                                              shortkeyk4=1;
+ 441   5                                      }
+ 442   4                              }
+ 443   3      
+ 444   3                              k1_cnt=0;
+ 445   3                              bit_k1=0;
+ 446   3      
+ 447   3                              k2_cnt=0;
+ 448   3                              bit_k2=0;
+ 449   3      
+ 450   3                              k3k4_cnt=0;
+ 451   3                              bit_k3k4=0;
+ 452   3      //                      k3_cnt=0;
+ 453   3      //                      bit_k3=0;
+ 454   3      //
+ 455   3      //                      k4_cnt=0;
+ 456   3      //                      bit_k4=0;
+ 457   3      
+ 458   3                              k3_cnt=0;
+ 459   3                              bit_k3=0;
+ 460   3                              bit_k3_L=0;
+ 461   3      
+ 462   3                              k4_cnt=0;
+ 463   3                              bit_k4=0;
+ 464   3                              bit_k4_L=0;
+ 465   3      
+ 466   3                              fsg_keynocol=0;
+ 467   3      
+ 468   3      
+ 469   3                              keynum=0;
+ 470   3                              keyram=0;
+ 471   3                              return;
+ 472   3                      }
+ 473   2                      keynum--;       //退到case 4
+ 474   2                      keynum--;
+ 475   2                      return;
+ 476   2                      default: 
+ 477   2                      return;
+ 478   2              }
+ 479   1      } 
+ 480          void KeySelect(void)
+ 481          {
+ 482   1              if(keyflag_1 | keyflag_2)
+ 483   1              {
+ 484   2              }
+ 485   1      
+ 486   1              if(r_K3K4used)
+ 487   1              {
+ 488   2                      shortkeyk3=0;
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 9   
+
+ 489   2                      shortkeyk4=0;
+ 490   2                      cnt_K3K4used++;
+ 491   2                      if(cnt_K3K4used>=50)
+ 492   2                      {
+ 493   3                              cnt_K3K4used=0;
+ 494   3                              r_K3K4used=0;
+ 495   3                      }       
+ 496   2              }
+ 497   1      }
+ 498          void KeyFunction(void)
+ 499          {
+ 500   1              if(shortkeyk1)   // 电源
+ 501   1              {
+ 502   2                      shortkeyk1=0;  
+ 503   2      
+ 504   2                      if(!f_onoff)
+ 505   2                      {
+ 506   3                              f_onoff=1;
+ 507   3                              BuzWork(1);
+ 508   3                      }
+ 509   2              }
+ 510   1              if(longkeyk1)
+ 511   1              {
+ 512   2                      longkeyk1=0;
+ 513   2                      if(f_onoff)
+ 514   2                      {
+ 515   3                              f_onoff=0;
+ 516   3                              f_settemp=0;
+ 517   3                              fsg_lowpower=0;
+ 518   3                              BuzWork(1);
+ 519   3                      }                       
+ 520   2              }
+ 521   1      //      if(shortkeyk2)   // 设置 
+ 522   1      //      {
+ 523   1      //              shortkeyk2=0;
+ 524   1      //              if(f_onoff)
+ 525   1      //              {
+ 526   1      //                      if(f_settemp)
+ 527   1      //                      {
+ 528   1      //                              f_settemp=0;
+ 529   1      ////                            WriteROM();
+ 530   1      //                      }
+ 531   1      //                      else
+ 532   1      //                              f_settemp=1;
+ 533   1      //                      BuzWork(1);
+ 534   1      //              }
+ 535   1      //      }
+ 536   1              if(longkeyk2)
+ 537   1              {
+ 538   2                      longkeyk2=0;
+ 539   2                      if(f_onoff)
+ 540   2                      {
+ 541   3                              fsg_lowpower^=1;
+ 542   3                      }
+ 543   2              }
+ 544   1              if(shortkeyk3|longkeyk3)          // add
+ 545   1              {
+ 546   2                      shortkeyk3=0; 
+ 547   2                      longkeyk3=0;
+ 548   2                      if(!f_settemp)
+ 549   2                              f_settemp=1;
+ 550   2                      else
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 10  
+
+ 551   2                      {
+ 552   3                              BuzWork(1);
+ 553   3                              Key_Add();
+ 554   3                      }                
+ 555   2              }
+ 556   1      
+ 557   1              if(shortkeyk4|longkeyk4)         // sub
+ 558   1              {
+ 559   2                      shortkeyk4=0;
+ 560   2                      longkeyk4=0; 
+ 561   2                      
+ 562   2                      if(!f_settemp)
+ 563   2                              f_settemp=1;
+ 564   2                      else
+ 565   2                      {
+ 566   3                              BuzWork(1);
+ 567   3                              Key_Sub();
+ 568   3                      }    
+ 569   2              }
+ 570   1      
+ 571   1              if(longkeyk3k4)
+ 572   1              {
+ 573   2                      longkeyk3k4=0;
+ 574   2                      if(f_onoff)
+ 575   2                      {
+ 576   3                              if(rsg_show_H)
+ 577   3                              {
+ 578   4                                      rsg_show_H=0;
+ 579   4                                      Settmp = TurnToCenti(Settmp);
+ 580   4                                      WriteROM();     
+ 581   4                              }
+ 582   3                              else
+ 583   3                              {
+ 584   4                                      rsg_show_H=1;
+ 585   4                                      Settmp = TurnToFahren(Settmp);
+ 586   4                                      WriteROM();             
+ 587   4                              }
+ 588   3                      }
+ 589   2              }
+ 590   1      
+ 591   1      
+ 592   1      //      if(shortkeyk5)
+ 593   1      //      {
+ 594   1      //              shortkeyk5=0;
+ 595   1      //      }
+ 596   1      //      if(shortkeyk6)   
+ 597   1      //      {
+ 598   1      //              shortkeyk6=0;  
+ 599   1      //      }
+ 600   1      //      if(shortkeyk7)  
+ 601   1      //      {
+ 602   1      //              shortkeyk7=0;
+ 603   1      //      }
+ 604   1      //      if(shortkeyk8)
+ 605   1      //      {
+ 606   1      //              shortkeyk8=0;  
+ 607   1      //      }
+ 608   1      //      if(shortkeyk9)  
+ 609   1      //      {
+ 610   1      //              shortkeyk9=0;       
+ 611   1      //      }
+ 612   1      //      if(shortkeyk10)
+C51 COMPILER V9.00   KEY                                                                   12/20/2020 16:52:20 PAGE 11  
+
+ 613   1      //      {
+ 614   1      //              shortkeyk10=0;
+ 615   1      //      }
+ 616   1      //      if(shortkeyk11)
+ 617   1      //      {
+ 618   1      //              shortkeyk11=0;
+ 619   1      //      }
+ 620   1      //      if(shortkeyk12)
+ 621   1      //      {
+ 622   1      //              shortkeyk12=0;
+ 623   1      //      }
+ 624   1      }
+ 625          void ClearKey(void)
+ 626          {
+ 627   1              keyflag_1=0;
+ 628   1              keyflag_2=0;
+ 629   1      }
+ 630          void KeyWork(void)
+ 631          {
+ 632   1              keydebouce();
+ 633   1              KeySelect();
+ 634   1              KeyFunction();
+ 635   1              ClearKey();
+ 636   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    924    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      2    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     14    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      8    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

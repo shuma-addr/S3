@@ -1,0 +1,392 @@
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE AD
+OBJECT MODULE PLACED IN ad.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE ad.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "h\SC93F843X_C.H"      
+   2          #include "h\data_type.h"
+   3          #include "lib\SensorMethod.h"
+   4          #include "config.h"
+   5          
+   6          #define DEFAULTTEMP 25
+   7          //#define ADC_MAX_NTC 828   //杩欎袱涓�间笉鑳芥槸琛ㄦ牸鐨勬瀬闄?
+   8          //#define ADC_MIN_NTC 139
+   9          
+  10          #define ADC_MAX 828
+  11          #define ADC_MIN 141
+  12          
+  13          #define ADH_MAX 796
+  14          #define ADH_MIN 197
+  15          
+  16          //#define TMP_MIN_NTC 0
+  17          //#define TMP_MAX_NTC   80
+  18          
+  19          
+  20          bit AdcFlag = 0;
+  21          
+  22          static xdata unsigned char ad8_cnt; 
+  23          static xdata unsigned int ad8_result,ad8_result_sum,ad8_result_ave;
+  24          static bit s_ad8_over=0;
+  25          
+  26          unsigned int AD_TS0=0,AD_TS1=0,AD_TSSUM=0;
+  27          
+  28          //static xdata unsigned char ad1_cnt; 
+  29          //static xdata unsigned int ad1_result,ad1_result_sum,ad1_result_ave;
+  30          //static bit s_ad1_over=0;
+  31          //
+  32          //static xdata unsigned char ad2_cnt; 
+  33          //xdata unsigned int ad2_result,ad2_result_sum,ad2_result_ave;
+  34          //static bit s_ad2_over=0;
+  35          
+  36          code unsigned int TABC_NTC[90]={          //摄氏温度表
+  37          828,821,813,805,797,789,781,772,763,    //-9到-1
+  38          755,746,737,728,719,709,700,690,681,671, //0-9
+  39          661,651,641,631,621,611,601,591,581,571,//10-19
+  40          561,551,541,531,521,512,502,492,482,473, //20-29
+  41          463,454,444,435,426,417,408,399,390,382, //30-39
+  42          373,365,357,349,341,333,325,318,310,303, //40-49
+  43          296,289,282,275,268,262,256,249,243,237, //50-59
+  44          232,226,220,215,210,204,199,194,190,185, //60-69
+  45          180,176,171,167,163,159,155,151,147,144, //70-79
+  46          140
+  47          };
+  48          
+  49          
+  50          
+  51          code unsigned int TABH_NTC[131]={         //华氏温度表
+  52          797,791,785,780,775,770,766,764,760,//23到31
+  53          755,750,745,740,735,730,725,720,715,709, //32-41
+  54          704,699,694,689,684,679,673,666,661,655, //42-51
+  55          649,643,637,631,626,621,616,611,605,600, //52-61
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 2   
+
+  56          594,588,582,576,571,566,561,555,550,544, //62-71
+  57          538,532,527,522,517,512,506,502,496,490, //72-81
+  58          485,478,473,468,463,458,453,448,443,438, //82-91
+  59          433,428,423,417,412,407,402,397,392,387,//92-101 
+  60          382,377,373,368,363,358,353,349,345,341, //102-111
+  61          337,333,328,324,320,316,312,308,304,300, //112-121
+  62          296,292,288,284,280,276,272,268,265,262,         //122-131
+  63          258,254,250,247,244,241,238,235,232,229,         //132-141
+  64          226,223,220,217,215,212,209,206,203,200,//142-151
+  65          198,196,                                                         //152-153
+  66          
+  67          };
+  68          
+  69          
+  70          void ADIOinit(void)//AD鍙ｏ紝IO鍙ｅ垵濮嬪寲   璇ュ嚱鏁版斁鍦ㄧ郴缁熶笂鐢碉紝杩涘叆涓诲惊鐜箣鍓嶏紱
+  71          {
+  72   1      //      P15输入口，AD口
+  73   1              P1CON &= ~0x20;  //0010 0000 
+  74   1              P1PH  &= ~0x20; 
+  75   1      
+  76   1      }
+  77          void ADinit(void)
+  78          {
+  79   1              ADIOinit();
+  80   1              s_ad8_over=0;//
+  81   1              ADCCON = 0X00;  //0000 0000   选择频率2M  
+  82   1      
+  83   1              ADCCFG0 |= 0x00;
+  84   1              ADCCFG1 |= 0x01;///0000 0001  设置AD8为AD输入口
+  85   1      
+  86   1              ADCCON |= 0X80;  //打开AD电源
+  87   1              IE &= ~0X40;        //关闭ADC中断
+  88   1              EA = 1;
+  89   1      
+  90   1              err_NTC_short=0;        
+  91   1              err_NTC_open=0;
+  92   1      }
+  93          
+  94          unsigned int  ADC_Convert(void)                                         
+  95          {
+  96   1              unsigned int adcdat;
+  97   1      
+  98   1              ADCCON |= 0X40;   //开始ADC转换
+  99   1              while(!(ADCCON&0x10));                           //等待 ADC转换完成;
+ 100   1              ADCCON &= ~(0X10);
+ 101   1              adcdat=(ADCVH<<4)+(ADCVL>>4);
+ 102   1      
+ 103   1              return(adcdat);
+ 104   1      }
+ 105          void Ch_ADchannel(unsigned char channel)
+ 106          {
+ 107   1              ADCCON &= ~0x0f;///0000 1111
+ 108   1              ADCCON |= channel;              
+ 109   1      }
+ 110          //void ADC_Interrupt(void) interrupt 6
+ 111          //{
+ 112          ////    ADCCON &= ~(0X20);  //清中断标志位
+ 113          //      AdcFlag = 1;
+ 114          //      ADCCON &= ~(0X10);
+ 115          //}
+ 116          void  ADC_ave(void)
+ 117          {
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 3   
+
+ 118   1              static xdata unsigned char AdIndx;      
+ 119   1          switch(AdIndx)
+ 120   1              {
+ 121   2                      case 0:         //AdIndx++;
+ 122   2                                              Ch_ADchannel(8);          //
+ 123   2                                              ad8_result=ADC_Convert();
+ 124   2                                              ad8_result_sum=ad8_result_sum+ad8_result;
+ 125   2                                              if(++ad8_cnt>=16)
+ 126   2                                              {
+ 127   3                                                      ad8_cnt=0;
+ 128   3                                                      ad8_result_sum=ad8_result_sum>>4;
+ 129   3                                                      /*12位数据转10位*/
+ 130   3                                                      ad8_result_sum= (ad8_result_sum>>2)&0x03ff;
+ 131   3                                                      ad8_result_ave= ad8_result_sum;
+ 132   3                                                      ad8_result_sum=0;
+ 133   3                                                      s_ad8_over=1;
+ 134   3                                              }
+ 135   2                                              break;
+ 136   2      
+ 137   2      //              case 1:         AdIndx++;
+ 138   2      //                                      Ch_ADchannel(0x01);      //CN3   腔体
+ 139   2      //                                      ad2_result=ADC_Convert();
+ 140   2      //                                      ad2_result_sum=ad2_result_sum+ad2_result;
+ 141   2      //                                      if(++ad2_cnt>=16)
+ 142   2      //                                      {
+ 143   2      //                                              ad2_cnt=0;
+ 144   2      //                                              ad2_result_sum=ad2_result_sum>>4;
+ 145   2      //                                              ad2_result_ave=ad2_result_sum;
+ 146   2      //                                              ad2_result_sum=0;
+ 147   2      //                                              s_ad2_over=1;
+ 148   2      //                                      }
+ 149   2      //                                      break;
+ 150   2      //              case 2:         AdIndx++;
+ 151   2      //                                      Ch_ADchannel(0x02);        //CN4  蒸汽发生器
+ 152   2      //                                      ad1_result=ADC_Convert();
+ 153   2      //                                      ad1_result_sum=ad1_result_sum+ad1_result;
+ 154   2      //                                      if(++ad1_cnt>=16)
+ 155   2      //                                      {
+ 156   2      //                                              ad1_cnt=0;
+ 157   2      //                                              ad1_result_sum=ad1_result_sum>>4;
+ 158   2      //                                              /*12位数据转10位*/
+ 159   2      //                                              ad1_result_sum= (ad1_result_sum>>2)&0x03ff;
+ 160   2      //                                              ad1_result_ave=ad1_result_sum;
+ 161   2      //                                              ad1_result_sum=0;
+ 162   2      //                                              s_ad1_over=1;
+ 163   2      //                                      }
+ 164   2      //                                      break;
+ 165   2      //                                      
+ 166   2      //              case 3:         AdIndx=0;
+ 167   2      //
+ 168   2      //                                      break;
+ 169   2                      default:    AdIndx=0;
+ 170   2                                              break;
+ 171   2              }
+ 172   1              
+ 173   1      }
+ 174          
+ 175          int GetTMP_NTC(unsigned int ad)//
+ 176          {
+ 177   1      
+ 178   1              static int TMP_NTC=DEFAULTTEMP;//
+ 179   1              int temp;
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 4   
+
+ 180   1      
+ 181   1              if(ad<=ADC_MIN) //
+ 182   1                      ad=ADC_MIN;
+ 183   1              else if(ad<=ADC_MAX)
+ 184   1              {}
+ 185   1              else
+ 186   1                      ad=ADC_MAX;                     
+ 187   1      
+ 188   1              if(TABC_NTC[0] < TABC_NTC[25]) //升序
+ 189   1              {
+ 190   2                      if(ad<TABC_NTC[TMP_NTC])
+ 191   2                      {
+ 192   3                              if(TMP_NTC)
+ 193   3                                      TMP_NTC--;
+ 194   3                      }
+ 195   2                      else if(ad<TABC_NTC[TMP_NTC+1] )
+ 196   2                      {
+ 197   3      
+ 198   3                      }
+ 199   2                      else
+ 200   2                              TMP_NTC++;      
+ 201   2              }
+ 202   1              else //降序
+ 203   1              {
+ 204   2                      if(ad<TABC_NTC[TMP_NTC+1])
+ 205   2                      {
+ 206   3                              TMP_NTC++;
+ 207   3                      }
+ 208   2                      else if(ad<TABC_NTC[TMP_NTC] )
+ 209   2                      {
+ 210   3                      }
+ 211   2                      else
+ 212   2                      {
+ 213   3                              if(TMP_NTC)
+ 214   3                                      TMP_NTC--;
+ 215   3                      }       
+ 216   2              }        
+ 217   1              temp = TMP_NTC-9;
+ 218   1              return(temp);           
+ 219   1      }
+ 220          
+ 221          int LookUpTabH(unsigned int ad)
+ 222          {
+ 223   1              static int TmpH=60;//当前温度默认为60
+ 224   1              int temp;
+ 225   1      
+ 226   1              if(ad<=ADH_MIN)
+ 227   1                      ad=ADH_MIN;
+ 228   1              else if(ad<ADH_MAX)
+ 229   1              {}
+ 230   1              else
+ 231   1                      ad=ADH_MAX;
+ 232   1      
+ 233   1              if(TABH_NTC[0] < TABH_NTC[25]) //升序
+ 234   1              {
+ 235   2                      if(ad<TABH_NTC[TmpH])
+ 236   2                      {
+ 237   3                              if(TmpH)
+ 238   3                                      TmpH--;
+ 239   3                      }
+ 240   2                      else if(ad<TABH_NTC[TmpH+1] )
+ 241   2                      {
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 5   
+
+ 242   3                      }
+ 243   2                      else
+ 244   2                              TmpH++; 
+ 245   2              }
+ 246   1              else //降序
+ 247   1              {
+ 248   2                      if(ad<TABH_NTC[TmpH+1])
+ 249   2                              TmpH++;
+ 250   2                      else if(ad<TABH_NTC[TmpH] )
+ 251   2                      {
+ 252   3                      }
+ 253   2                      else
+ 254   2                      {
+ 255   3                              if(TmpH)
+ 256   3                                      TmpH--;
+ 257   3                      }       
+ 258   2              }       
+ 259   1      
+ 260   1              temp=TmpH+23;//+32-9;   
+ 261   1      
+ 262   1              return(temp);           
+ 263   1      }       
+ 264          
+ 265          
+ 266          void GetTmp(void)   //
+ 267          {
+ 268   1      
+ 269   1              #define AD_L  10
+ 270   1              #define AD_H  1020
+ 271   1              unsigned int temp;
+ 272   1              static unsigned int ad3H_bak=0;
+ 273   1              static unsigned int ad3C_bak=0;
+ 274   1      
+ 275   1              if(s_ad8_over)   //10位
+ 276   1              {
+ 277   2                      if(ad3C_bak >= ad8_result_ave)//求差值 摄氏
+ 278   2                              temp = ad3C_bak - ad8_result_ave;
+ 279   2                      else
+ 280   2                              temp = ad8_result_ave - ad3C_bak;
+ 281   2      
+ 282   2                      if(ad8_result_ave<=ADC_MIN)
+ 283   2                      {
+ 284   3                              ad3C_bak = ad8_result_ave;
+ 285   3                      }
+ 286   2                      else if(ad8_result_ave<ADC_MAX)
+ 287   2                      {
+ 288   3                              //新检测到的AD值与上一次的之间的差值大于6，以新的AD值做温度转换；
+ 289   3                              if(temp > 6)
+ 290   3                                      ad3C_bak = ad8_result_ave;
+ 291   3                              else
+ 292   3                              {/*ad3C_bak保持不变*/}  
+ 293   3                      }
+ 294   2                      else
+ 295   2                      {
+ 296   3                              ad3C_bak = ad8_result_ave;
+ 297   3                      }       
+ 298   2      
+ 299   2                      if(ad3H_bak >= ad8_result_ave)  //求差值  华氏
+ 300   2                              temp = ad3H_bak - ad8_result_ave;
+ 301   2                      else
+ 302   2                              temp = ad8_result_ave - ad3H_bak;
+ 303   2      
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 6   
+
+ 304   2      
+ 305   2                      if(ad8_result_ave<=ADH_MIN)
+ 306   2                      {
+ 307   3                              ad3H_bak = ad8_result_ave;
+ 308   3                      }
+ 309   2                      else if(ad8_result_ave<ADH_MAX)
+ 310   2                      {
+ 311   3                              //新检测到的AD值与上一次的之间的差值大于6，以新的AD值做温度转换；
+ 312   3                              if(temp > 6)
+ 313   3                                      ad3H_bak = ad8_result_ave;
+ 314   3                              else
+ 315   3                              {/*ad3H_bak保持不变*/}  
+ 316   3                      }
+ 317   2                      else
+ 318   2                      {
+ 319   3                              ad3H_bak = ad8_result_ave;
+ 320   3                      }
+ 321   2                              
+ 322   2                      if(ad8_result_ave<AD_L)
+ 323   2                      {
+ 324   3                              err_NTC_open=1;
+ 325   3                              err_NTC_short=0;
+ 326   3                      }
+ 327   2                      else if(ad8_result_ave<AD_H)
+ 328   2                      {
+ 329   3                              err_NTC_open=0;
+ 330   3                              err_NTC_short=0;
+ 331   3                              Tmp_C = GetTMP_NTC(ad3C_bak);
+ 332   3      //                      Tmp_C = -3;
+ 333   3                              Tmp_H = LookUpTabH(ad3H_bak); //S
+ 334   3      //                      Tmp_H = 25;
+ 335   3                      }
+ 336   2                      else
+ 337   2                      {
+ 338   3                              err_NTC_short=1;        
+ 339   3                              err_NTC_open=0;
+ 340   3                      }                               
+ 341   2      
+ 342   2              }
+ 343   1              else
+ 344   1              {
+ 345   2                      Tmp_C = DEFAULTTEMP;//
+ 346   2                      Tmp_H = 60;
+ 347   2              }
+ 348   1      
+ 349   1      }
+ 350          bit ForceClose_lev1(void)
+ 351          {
+ 352   1              if(err_NTC_open | err_NTC_short)
+ 353   1                      return(1);
+ 354   1              else
+ 355   1                      return(0);
+ 356   1      }
+ 357          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    843    ----
+   CONSTANT SIZE    =    442    ----
+   XDATA SIZE       =      8    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     14    ----
+C51 COMPILER V9.00   AD                                                                    12/20/2020 16:52:20 PAGE 7   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,12 @@
+"STARTUP.obj",
+"S_TouchKeyCFG.obj",
+".\lib\SC93F8X3X_HighSensitive_Lib_T2_V1.1.0.LIB",
+"leddrive.obj",
+"ram.obj",
+"led.obj",
+"main.obj",
+"key.obj",
+"ad.obj" 
+TO "SC93F8X3X_T2_Demo_Code" 
+RAMSIZE(256) 
+CODE( 0x100 )

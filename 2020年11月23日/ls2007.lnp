@@ -1,0 +1,14 @@
+"STARTUP.obj",
+"S_TouchKeyCFG.obj",
+"leddrive.obj",
+"ram.obj",
+"led.obj",
+"main.obj",
+"key.obj",
+"ad.obj",
+".\lib\SC93F8X3X_HighSensitive_Lib_T1_V1.1.0.LIB",
+"outload.obj",
+"iap.obj" 
+TO "ls2007" 
+RAMSIZE(256) 
+CODE( 0x100 )

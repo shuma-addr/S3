@@ -1,0 +1,80 @@
+C51 COMPILER V9.00   ADC_INIT                                                              10/22/2020 14:06:45 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE ADC_INIT
+OBJECT MODULE PLACED IN ADC_Init.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE 111\c\ADC_Init.c BROWSE DEBUG OBJECTEXTEND PRINT(.\ADC_Init.lst) OBJECT(ADC
+                    -_Init.obj)
+
+line level    source
+
+   1          #include "H/SC93F843X_C.H"
+   2          #include "H/Function_Init.H"
+*** WARNING C318 IN LINE 2 OF 111\c\ADC_Init.c: can't open file 'H/Function_Init.H'
+   3          
+   4          /*****************************************************
+   5          *函数名称：void ADC_Init(void)
+   6          *函数功能：ADC初始化
+   7          *入口参数：void
+   8          *出口参数：void
+   9          *****************************************************/
+  10          unsigned int ADCValue = 0x0000;
+  11          void ADC_Init(void)
+  12          {
+  13   1              ADCCON = 0X89;          //开启ADC，ADC采样频率为2M ,选择AIN9位ADC采样口
+  14   1              ADCCFG0 = 0x00;   //设置AIN9作为采样口
+  15   1              ADCCFG1 = 0X02;   //设置AIN9作为采样口
+  16   1      //      IE = 0X40;        //开启ADC中断
+  17   1              EA = 1;
+  18   1      
+  19   1              ADCCON |= 0X40;   //开始ADC转换
+  20   1              while(!(ADCCON&0x10));                           //等待 ADC转换完成;
+  21   1              ADCValue=(ADCVH<<4)+(ADCVL>>4);
+  22   1      }
+  23          
+  24          /*****************************************************
+  25          *函数名称：void ADC_TS_Init(void)
+  26          *函数功能：ADC采集温度传感器电压值
+  27          *入口参数：void
+  28          *出口参数：void
+  29          *****************************************************/
+  30          void ADC_TS_Init(void)
+  31          {
+  32   1              unsigned int AD_TS0=0,AD_TS1=0,AD_TSSUM=0;
+  33   1              
+  34   1              ADCCON = 0x8E;          //开启ADC，ADC采样频率为2M ,ADC输入为温度传感器输出
+  35   1              ADCCFG0 = 0x00;   //
+  36   1              ADCCFG1 = 0X00;   //
+  37   1              while(1)
+  38   1              {
+  39   2                      TSCFG = 0X80;
+  40   2                      ADCCON |= 0x40;   //开始ADC转换         
+  41   2                      while(!(ADCCON&0x10));
+  42   2                      ADCCON &= 0xEF;   //清中断标志位
+  43   2                      AD_TS0 = (ADCVH<<4)+(ADCVL>>4);  //第一次温度传感器数值
+  44   2                      
+  45   2                      TSCFG |= 0X01;
+  46   2                      ADCCON |= 0x40;   //开始ADC转换         
+  47   2                      while(!(ADCCON&0x10));
+  48   2                      ADCCON &= 0xEF;   //清中断标志位
+  49   2                      AD_TS1 = (ADCVH<<4)+(ADCVL>>4);  //第二次温度传感器数值
+  50   2                      
+  51   2                      AD_TSSUM = (AD_TS0+AD_TS1)/2;    //温度传感器数值
+  52   2              }
+  53   1      }
+C51 COMPILER V9.00   ADC_INIT                                                              10/22/2020 14:06:45 PAGE 2   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    152    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,227 @@
+C51 COMPILER V9.00   LEDDRIVE                                                              12/20/2020 16:52:20 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE LEDDRIVE
+OBJECT MODULE PLACED IN leddrive.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE leddrive.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "h\SC93F843X_C.H"      
+   2          #include "h\data_type.h"
+   3          #include "config.h"
+   4          
+   5          //extern void Leddrivework();
+   6          
+   7          #define COM0  P17
+   8          #define COM1  P16
+   9          #define COM2  P07
+  10          #define COM3  P21
+  11          
+  12          
+  13          
+  14          void Leddriveinit()
+  15          {
+  16   1              //com¿Ú£ºP17,P16,P21,P07  SEG¿Ú£ºP27,P25-22,P20,P06
+  17   1              P0CON |= 0xC0; //1100 0000
+  18   1              P0PH  &= ~0xC0;
+  19   1                      
+  20   1              P1CON |= 0xC0;  //1100 0000
+  21   1              P1PH  &= ~0xC0;
+  22   1      
+  23   1              P2CON |= 0xBF; //1011 1111
+  24   1              P2PH  &= ~0xBF; 
+  25   1      
+  26   1              IOHCON |= 0xFF;//1111 1100
+  27   1      //      IOHCON |= 0x00;//1111 1100
+  28   1      }
+  29          void SetAllcom()
+  30          {
+  31   1              COM0 = 0;
+  32   1              COM1 = 0;
+  33   1              COM2 = 0;
+  34   1              COM3 = 0;       
+  35   1      }
+  36          
+  37          void ClearAllseg()
+  38          {
+  39   1              P2 &= ~0xbd;
+  40   1              P06 = 0;
+  41   1      }
+  42          void ScanEcom()
+  43          {
+  44   1              static unsigned char comcnt;
+  45   1      
+  46   1      //      if(!fsg_lowpower)
+  47   1      //      {
+  48   1      //              switch (comcnt)
+  49   1      //              {
+  50   1      //                      case 0:
+  51   1      //                              comcnt++;
+  52   1      //                              COM0 = 1;
+  53   1      //                              P2 |= segval[0] & 0xbd;    //1011 1101
+  54   1      //                              if(segval[0] & 0x02)    //0000 0010
+  55   1      //                                      P06 = 1;        
+C51 COMPILER V9.00   LEDDRIVE                                                              12/20/2020 16:52:20 PAGE 2   
+
+  56   1      //                              break;
+  57   1      //                      case 1:
+  58   1      //                              comcnt++;
+  59   1      //                              COM1 = 1;
+  60   1      //                              P2 |= segval[1] & 0xbd;    //1011 1101
+  61   1      //                              if(segval[1] & 0x02)    //0000 0010
+  62   1      //                                      P06 = 1;        
+  63   1      //                              break;
+  64   1      //                      case 2:
+  65   1      //                              comcnt++;
+  66   1      //                              COM2 = 1;
+  67   1      //                              P2 |= segval[2] & 0xbd;    //1011 1101
+  68   1      //                              if(segval[2] & 0x02)    //0000 0010
+  69   1      //                                      P06 = 1;
+  70   1      //                              break;
+  71   1      //                      case 3:
+  72   1      //                              comcnt=0;
+  73   1      //                              COM3 = 1;
+  74   1      //                              P2 |= segval[3] & 0xbd;    //1011 1101
+  75   1      //                              if(segval[3] & 0x02)    //0000 0010
+  76   1      //                                      P06 = 1;
+  77   1      //                              break;
+  78   1      //                      default:
+  79   1      //                              comcnt = 0;
+  80   1      //                              break;
+  81   1      //              }       
+  82   1      //      }
+  83   1      //      else
+  84   1      //      {
+  85   1      //              switch (comcnt)
+  86   1      //              {
+  87   1      //                      case 0:
+  88   1      //                              comcnt++;
+  89   1      //                              COM0 = 1;
+  90   1      //                              P2 |= segval[0] & 0xbd;    //1011 1101
+  91   1      //                              if(segval[0] & 0x02)    //0000 0010
+  92   1      //                                      P06 = 1;        
+  93   1      //                              break;
+  94   1      //                      case 1:
+  95   1      //                              comcnt++;       
+  96   1      //                              break;
+  97   1      //                      case 2:
+  98   1      //                              comcnt++;
+  99   1      //                              COM1 = 1;
+ 100   1      //                              P2 |= segval[1] & 0xbd;    //1011 1101
+ 101   1      //                              if(segval[1] & 0x02)    //0000 0010
+ 102   1      //                                      P06 = 1;        
+ 103   1      //                              break;
+ 104   1      //                      case 3:
+ 105   1      //                              comcnt++;       
+ 106   1      //                              break;
+ 107   1      //                      case 4:
+ 108   1      //                              comcnt++;
+ 109   1      //                              COM2 = 1;
+ 110   1      //                              P2 |= segval[2] & 0xbd;    //1011 1101
+ 111   1      //                              if(segval[2] & 0x02)    //0000 0010
+ 112   1      //                                      P06 = 1;
+ 113   1      //                              break;
+ 114   1      //                      case 5:
+ 115   1      //                              comcnt++;       
+ 116   1      //                              break;
+ 117   1      //                      case 6:
+C51 COMPILER V9.00   LEDDRIVE                                                              12/20/2020 16:52:20 PAGE 3   
+
+ 118   1      //                              comcnt++;
+ 119   1      //                              COM3 = 1;
+ 120   1      //                              P2 |= segval[3] & 0xbd;    //1011 1101
+ 121   1      //                              if(segval[3] & 0x02)    //0000 0010
+ 122   1      //                                      P06 = 1;
+ 123   1      //                              break;
+ 124   1      //                      case 7:
+ 125   1      //                              comcnt=0;       
+ 126   1      //                              break;
+ 127   1      //                      default:
+ 128   1      //                              comcnt = 0;
+ 129   1      //                              break;
+ 130   1      //              }               
+ 131   1      //      }
+ 132   1                      switch (comcnt)
+ 133   1                      {
+ 134   2                              case 0:
+ 135   2                                      comcnt++;
+ 136   2                                      COM0 = 1;
+ 137   2                                      P2 |= segval[0] & 0xbd;    //1011 1101
+ 138   2                                      if(segval[0] & 0x02)    //0000 0010
+ 139   2                                              P06 = 1;        
+ 140   2                                      break;
+ 141   2                              case 1:
+ 142   2                                      comcnt++;       
+ 143   2                                      break;
+ 144   2                              case 2:
+ 145   2                                      comcnt++;       
+ 146   2                                      break;
+ 147   2                              case 3:
+ 148   2                                      comcnt++;
+ 149   2                                      COM1 = 1;
+ 150   2                                      P2 |= segval[1] & 0xbd;    //1011 1101
+ 151   2                                      if(segval[1] & 0x02)    //0000 0010
+ 152   2                                              P06 = 1;        
+ 153   2                                      break;
+ 154   2                              case 4:
+ 155   2                                      comcnt++;       
+ 156   2                                      break;
+ 157   2                              case 5:
+ 158   2                                      comcnt++;       
+ 159   2                                      break;
+ 160   2                              case 6:
+ 161   2                                      comcnt++;
+ 162   2                                      COM2 = 1;
+ 163   2                                      P2 |= segval[2] & 0xbd;    //1011 1101
+ 164   2                                      if(segval[2] & 0x02)    //0000 0010
+ 165   2                                              P06 = 1;
+ 166   2                                      break;
+ 167   2                              case 7:
+ 168   2                                      comcnt++;       
+ 169   2                                      break;
+ 170   2                              case 8:
+ 171   2                                      comcnt++;       
+ 172   2                                      break;
+ 173   2                              case 9:
+ 174   2                                      comcnt++;
+ 175   2                                      COM3 = 1;
+ 176   2                                      P2 |= segval[3] & 0xbd;    //1011 1101
+ 177   2                                      if(segval[3] & 0x02)    //0000 0010
+ 178   2                                              P06 = 1;
+ 179   2                                      break;
+C51 COMPILER V9.00   LEDDRIVE                                                              12/20/2020 16:52:20 PAGE 4   
+
+ 180   2                              case 10:
+ 181   2                                      comcnt++;       
+ 182   2                                      break;
+ 183   2                              case 11:
+ 184   2                                      comcnt=0;       
+ 185   2                                      break;
+ 186   2                              default:
+ 187   2                                      comcnt = 0;
+ 188   2                                      break;
+ 189   2                      }               
+ 190   1      }
+ 191          
+ 192          void Leddrivework()
+ 193          {
+ 194   1              SetAllcom();
+ 195   1              ClearAllseg();
+ 196   1              ScanEcom();     
+ 197   1      }
+ 198          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    188    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

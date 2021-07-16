@@ -1,0 +1,361 @@
+C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE C\main.c BROWSE DEBUG OBJECTEXTEND PRINT(.\main.lst) OBJECT(main.obj)
+
+line level    source
+
+   1          //************************************************************
+   2          //  Copyright (c) 深圳市赛元微电子有限公司
+   3          //      文件名称        : main.c
+   4          //      作者            : Yanni
+   5          //      模块功能        : SC93F843X触控DEMO
+   6          //  最后更正日期:
+   7          //      版本            : 2015-12-25:
+   8          //              :  
+   9          //*************************************************************
+  10          #include "h\SC93F843X_C.H"      
+  11          #include "h\data_type.h"
+  12          #include "lib\SensorMethod.h"
+  13          #include "config.h"
+  14          
+  15          
+  16          
+  17          
+  18          void Leddriveinit();
+  19          void Leddrivework();
+  20          void ledinit();
+  21          void KeyWork(void);
+  22          void ADinit(void);
+  23          void  ADC_ave(void);
+  24          void GetTmp(void);
+  25          void PowerOnClearLoad(void);
+  26          void Relaywork();
+  27          void Keyinit();
+  28          bit k3k4isdown();
+  29          
+  30          
+  31          
+  32          //*****************全局变量区***************************************************
+  33          
+  34          //INT8U  Timercount = 0;                        //定时器计数
+  35          
+  36          
+  37          static bit f_2ms,f_10ms,timerwork_20ms,f_100ms,f_500ms,f_BTM500MS,f_BTM500MS_bak,f_1s;
+  38          static unsigned int t_cnt0;
+  39          unsigned char r_cnt1,r_cnt2,r_cnt4,r_cnt5;
+  40          static unsigned char r_ex=0;
+  41          static xdata unsigned char cnt_set=0;
+  42          static unsigned char r_excnt;
+  43          static unsigned char nocolcnt=0;
+  44          static unsigned int t_cnt3;
+  45          int uu_1,uu;
+  46          
+  47           /**************************************************
+  48          *函数名称：void TimerInit(void) 
+  49          *函数功能：定时器初始化
+  50          *入口参数：void
+  51          *出口参数：void
+  52          **************************************************/
+  53          void TimerInit(void)
+  54          {
+  55   1              TMCON = (TMCON&0xfe)|(0<<0);            //bit0: 0为FOSC/12,1为FOSO
+C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 2   
+
+  56   1      
+  57   1              TMOD = TMOD&0xf0;                                       //设置定时0，工作方式0
+  58   1              TMOD = TMOD|0x00;
+  59   1              TH0=(8192-500)/32;                              //1MS
+  60   1              TL0=(8192-500)%32;
+  61   1              TF0 = 0;                                                    //清中断标志
+  62   1              TR0=0;                                                          //关定时器0
+  63   1              ET0=1;                                                          //使能定时器0中断
+  64   1              TR0=1;
+  65   1      }
+  66          
+  67          /**************************************************
+  68          *函数名称：void timer0()interrupt 1 
+  69          *函数功能：定时器中断服务函数
+  70          *入口参数：void
+  71          *出口参数：void 
+  72          **************************************************/
+  73          void timer0()interrupt 1
+  74          {
+  75   1              TH0 = (8192-500)/32;                            
+  76   1              TL0 = (8192-500)%32;    
+  77   1      //      TimerFlag_1ms = 1;      
+  78   1      
+  79   1      
+  80   1      
+  81   1              r_cnt1++;
+  82   1              if(r_cnt1 >= 10)
+  83   1              {
+  84   2                      r_cnt1=0;
+  85   2                      f_10ms=1;
+  86   2      
+  87   2      
+  88   2      
+  89   2                      r_cnt2++;
+  90   2                      if(r_cnt2 >= 10)
+  91   2                      {
+  92   3                              r_cnt2=0;
+  93   3                              f_100ms=1;
+  94   3                      }       
+  95   2      
+  96   2      
+  97   2      
+  98   2      
+  99   2                      r_cnt4++;
+ 100   2                      if(r_cnt4 >= 2)
+ 101   2                      {
+ 102   3                              r_cnt4=0;
+ 103   3                              timerwork_20ms=1;
+ 104   3                      }
+ 105   2              }
+ 106   1      
+ 107   1              t_cnt3++;
+ 108   1              if(t_cnt3 >= 500)
+ 109   1              {
+ 110   2                      t_cnt3=0;
+ 111   2                      f_500ms=1;
+ 112   2                      fs_col500ms ^= 1;
+ 113   2                      fig_diswork_500ms ^= 1;
+ 114   2                      col_500ms ^= 1;
+ 115   2                      P04 = ~P04;
+ 116   2              }       
+ 117   1              
+C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 3   
+
+ 118   1              r_cnt5++;
+ 119   1              if(r_cnt5 >= 2)
+ 120   1              {
+ 121   2                      r_cnt5=0;
+ 122   2                      f_2ms=1;
+ 123   2              }       
+ 124   1      
+ 125   1              
+ 126   1      }
+ 127           /**************************************************
+ 128          *函数名称：void  Sys_Init(void) 
+ 129          *函数功能：系统初始化
+ 130          *入口参数：void
+ 131          *出口参数：void  
+ 132          **************************************************/
+ 133          void  Sys_Init(void)
+ 134          {       
+ 135   1      //      WDTCON  = 0x10;                             //1--1 -- 00    开WDT,WDT清0,WDT 524.288ms溢出;烧录时，可Code Option选择ENWDT
+ 136   1              //TK对应的IO设置为强推挽输出1
+ 137   1              P0CON = 0xFF;
+ 138   1              P0PH  = 0xFF;   
+ 139   1              P1CON = 0xFF;
+ 140   1              P1PH  = 0xFF;
+ 141   1              P2CON = 0xFF;
+ 142   1              P2PH  = 0xFF;
+ 143   1              P5CON = 0xFF;
+ 144   1              P5PH  = 0xFF;
+ 145   1              P0 = 0xFF;
+ 146   1              P1 = 0xFF;
+ 147   1              P2 = 0xFF;
+ 148   1              P5 = 0x00;      
+ 149   1                         
+ 150   1              EA = 1;                                         //开总中断      
+ 151   1          TimerInit();                                //定时器初始化
+ 152   1      }
+ 153          void ClearSetTimeCount(void)  //清设置计时
+ 154          {
+ 155   1              cnt_set=0;
+ 156   1              fsg_keynocolbf=1;
+ 157   1              col_500ms=1;
+ 158   1              t_cnt3 =0;
+ 159   1      }
+ 160          void TimerWork()
+ 161          {
+ 162   1              
+ 163   1              if(timerwork_20ms)
+ 164   1              {
+ 165   2                      timerwork_20ms=0;
+ 166   2                      if(Delaybuzz)
+ 167   2                              Delaybuzz--;
+ 168   2      
+ 169   2                      if(f_settemp)
+ 170   2                      {
+ 171   3                              if(k3k4isdown())
+ 172   3                              {
+ 173   4                                      cnt_set=0;
+ 174   4                              }
+ 175   3                              else
+ 176   3                              {
+ 177   4                                      cnt_set++;
+ 178   4                                      if(cnt_set>=250)
+ 179   4                                      {
+C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 4   
+
+ 180   5                                              cnt_set=0;
+ 181   5                                              f_settemp=0;
+ 182   5                                              WriteROM();
+ 183   5                                      }
+ 184   4                              }
+ 185   3                      }
+ 186   2                      else
+ 187   2                              cnt_set=0;
+ 188   2      
+ 189   2                      if(fsg_keynocolbf)
+ 190   2                      {
+ 191   3                              nocolcnt++;
+ 192   3                              if(nocolcnt>=15)
+ 193   3                              {
+ 194   4                                      nocolcnt=0;
+ 195   4                                      fsg_keynocolbf=0;
+ 196   4                              }
+ 197   3                      }
+ 198   2                      else
+ 199   2                              nocolcnt=0;
+ 200   2      
+ 201   2                      if(fsg_keynocolbf)
+ 202   2                              fsg_keynocol=1;
+ 203   2                      else
+ 204   2                              fsg_keynocol=0; 
+ 205   2              }
+ 206   1      }
+ 207          
+ 208          void Argumentinit()
+ 209          {
+ 210   1              rsg_show_H = 0;
+ 211   1      //      if()
+ 212   1      //      Settmp=22;
+ 213   1              PowerOnClearLoad();
+ 214   1      
+ 215   1              f_onoff=1;//上电即开机
+ 216   1      }
+ 217          
+ 218          
+ 219          /**************************************************
+ 220          *函数名称：void main(void)                                                                
+ 221          *函数功能：主函数
+ 222          *入口参数：void
+ 223          *出口参数：void  
+ 224          **************************************************/
+ 225          void main(void)
+ 226          {                                       
+ 227   1              Sys_Init();
+ 228   1              Leddriveinit();
+ 229   1              ledinit();
+ 230   1              ADinit();
+ 231   1      //      IAP_Init();
+ 232   1              
+ 233   1              //触控按键初始化
+ 234   1      //      TouchKeyInit();
+ 235   1              Keyinit();
+ 236   1              Argumentinit();
+ 237   1      
+ 238   1              
+ 239   1      
+ 240   1      
+ 241   1              if(IAPRead(2) == EEP_FLAG)
+C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 5   
+
+ 242   1              {
+ 243   2                      Settmp=IAPRead(0);//25;
+ 244   2                      rsg_show_H=IAPRead(1);//上点显示摄氏
+ 245   2              }
+ 246   1              else
+ 247   1              {
+ 248   2                      Settmp=10;
+ 249   2                      rsg_show_H=0;//上点显示摄氏             
+ 250   2              }
+ 251   1      
+ 252   1      
+ 253   1              while(1)
+ 254   1              {
+ 255   2      //         WDTCON  = 0x10;
+ 256   2                 TimerWork();
+ 257   2                                        
+ 258   2                      if(f_2ms)
+ 259   2                      {
+ 260   3                              f_2ms=0;
+ 261   3                              Leddrivework();
+ 262   3                              r_ex=1;
+ 263   3                      }
+ 264   2                      else
+ 265   2                      {
+ 266   3                              if(r_ex)
+ 267   3                              {
+ 268   4                                      r_ex=0;
+ 269   4                                      r_excnt++;
+ 270   4                                      if(r_excnt>=5)
+ 271   4                                      {
+ 272   5                                              r_excnt=0;
+ 273   5                                              KeyWork();
+ 274   5                                      }
+ 275   4                              }               
+ 276   3                      }
+ 277   2      
+ 278   2                      if(f_10ms)
+ 279   2                      {
+ 280   3                              f_10ms=0;
+ 281   3                              FanWork() ;
+ 282   3                              ADC_ave();
+ 283   3                              ledwork();
+ 284   3      //                      showtemp(uu_1);
+ 285   3                      }
+ 286   2                      GetTmp();
+ 287   2                      
+ 288   2                      if(f_100ms)
+ 289   2                      {
+ 290   3                              f_100ms=0;
+ 291   3                              
+ 292   3                               
+ 293   3                      }
+ 294   2      
+ 295   2                      if(f_500ms)
+ 296   2                      {
+ 297   3                              f_500ms=0;
+ 298   3                              Relaywork();
+ 299   3      //              uu_1++;
+ 300   3      //              if(uu_1>-1)
+ 301   3      //                      uu_1=-9;
+ 302   3                      }
+ 303   2              //      ADCCON &= ~(0X10);
+C51 COMPILER V9.00   MAIN                                                                  12/20/2020 16:52:20 PAGE 6   
+
+ 304   2              
+ 305   2                        
+ 306   2      //              uu = TurnToFahren(uu_1); 
+ 307   2              } 
+ 308   1      }
+ 309          
+ 310          
+ 311           
+ 312          
+ 313          
+ 314          
+ 315          
+ 316          
+ 317          
+ 318          
+ 319          
+ 320          
+ 321          
+ 322          
+ 323          
+ 324          
+ 325          
+ 326          
+ 327          
+ 328          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    420    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      1    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      8    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

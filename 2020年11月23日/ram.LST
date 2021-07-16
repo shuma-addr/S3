@@ -1,0 +1,58 @@
+C51 COMPILER V9.00   RAM                                                                   12/20/2020 16:52:20 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE RAM
+OBJECT MODULE PLACED IN ram.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE ram.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "config.h"
+   2          
+   3          
+   4          bit fs_col500ms;
+   5          
+   6          
+   7          bit err_sense;
+   8          bit f_keydown;
+   9          
+  10          
+  11          
+  12          unsigned char Delaybuzz;
+  13          bit f_lamp=0;   
+  14          //unsigned char dis_value3;
+  15          bit f_onoff=0;
+  16          bit f_settemp=0;
+  17          bit col_500ms=0;
+  18          unsigned char Tmp_Flag;
+  19          xdata int Settmp;
+  20          //unsigned char Settmp_H;
+  21          xdata int Tmp_H;
+  22          //bit fsg_keynocol;
+  23          bit fsg_keynocolbf;
+  24          unsigned char xdata rsg_show_H;
+  25          //unsigned char Tmp;
+  26          bit fsg_lowpower=0;
+  27          unsigned char xdata Test_Value=0;
+  28          
+  29          xdata unsigned char rsg_showver=0;
+  30          xdata int Tmp_C; 
+  31          bit fig_adjust_500ms=0;
+  32          bit fig_diswork_500ms=0;
+  33          bit err_NTC_short=0;    
+  34          bit err_NTC_open=0;
+  35          //xdata unsigned char rsg_TMPNTC;
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      9    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =     13    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
