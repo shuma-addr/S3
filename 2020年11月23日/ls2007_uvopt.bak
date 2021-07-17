@@ -315,7 +315,7 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>14</ColumnNumber>
+      <ColumnNumber>15</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
       <TopLine>1</TopLine>
       <CurrentLine>20</CurrentLine>
@@ -1874,7 +1874,7 @@
         </Doc>
         <Doc>
           <Name>.\outload.c</Name>
-          <ColumnNumber>14</ColumnNumber>
+          <ColumnNumber>15</ColumnNumber>
           <TopLine>1</TopLine>
           <CurrentLine>20</CurrentLine>
         </Doc>

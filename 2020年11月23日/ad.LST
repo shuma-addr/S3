@@ -1,9 +1,9 @@
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 1   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE AD
 OBJECT MODULE PLACED IN ad.OBJ
-COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE ad.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: D:\Keil\C51\BIN\C51.EXE ad.c BROWSE DEBUG OBJECTEXTEND
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   53          755,750,745,740,735,730,725,720,715,709, //32-41
   54          704,699,694,689,684,679,673,666,661,655, //42-51
   55          649,643,637,631,626,621,616,611,605,600, //52-61
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 2   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 2   
 
   56          594,588,582,576,571,566,561,555,550,544, //62-71
   57          538,532,527,522,517,512,506,502,496,490, //72-81
@@ -126,7 +126,7 @@ line level    source
  115          //}
  116          void  ADC_ave(void)
  117          {
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 3   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 3   
 
  118   1              static xdata unsigned char AdIndx;      
  119   1          switch(AdIndx)
@@ -190,7 +190,7 @@ line level    source
  177   1      
  178   1              static int TMP_NTC=DEFAULTTEMP;//
  179   1              int temp;
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 4   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 4   
 
  180   1      
  181   1              if(ad<=ADC_MIN) //
@@ -254,7 +254,7 @@ line level    source
  239   3                      }
  240   2                      else if(ad<TABH_NTC[TmpH+1] )
  241   2                      {
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 5   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 5   
 
  242   3                      }
  243   2                      else
@@ -318,7 +318,7 @@ line level    source
  301   2                      else
  302   2                              temp = ad8_result_ave - ad3H_bak;
  303   2      
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 6   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 6   
 
  304   2      
  305   2                      if(ad8_result_ave<=ADH_MIN)
@@ -382,7 +382,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    XDATA SIZE       =      8    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =     14    ----
-C51 COMPILER V9.00   AD                                                                    07/17/2021 06:23:12 PAGE 7   
+C51 COMPILER V9.00   AD                                                                    07/17/2021 13:56:31 PAGE 7   
 
    IDATA SIZE       =   ----    ----
    BIT SIZE         =      2    ----
