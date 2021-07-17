@@ -11,13 +11,13 @@
 #define		IO_FAN		P51//P17
 //#define		IO_LAMP		P10
 
-#define WARMON 1  //¿ªÆôÖÆÈÈ
-#define COLDON 2   //¿ªÆôÖÆÀä
-#define BOTHCLOSE 0	  //ÖÆÀäÖÆÈÈ¶¼¹Ø
+#define WARMON 1  //å¼€å¯åˆ¶çƒ­
+#define COLDON 2   //å¼€å¯åˆ¶å†·
+#define BOTHCLOSE 0	  //åˆ¶å†·åˆ¶çƒ­éƒ½å…³
 
-#define CLOSE 0	   //·çÉÈ¹Ø
-#define HALF 1	  //·çÉÈ°ë¹¦ÂÊÊä³ö
-#define ALL 111	 //·çÉÈÈ«¹¦ÂÊÊä³ö
+#define CLOSE 0	   //é£æ‰‡å…³
+#define HALF 1	  //é£æ‰‡åŠåŠŸç‡è¾“å‡º
+#define ALL 123	 //é£æ‰‡å…¨åŠŸç‡è¾“å‡º
 
 
 
@@ -54,11 +54,11 @@ void OutputBf(unsigned char temp)
 {
 	switch (temp)
 	{
-		case TEMPADD:  //ÎÂ¶È´¦ÓÚÉÏÉı×´Ì¬
-			Output(WARMON);	//ÖÆÈÈ
+		case TEMPADD:  //æ¸©åº¦å¤„äºä¸Šå‡çŠ¶æ€
+			Output(WARMON);	//åˆ¶çƒ­
 			break;
 		case TEMPSUB:
-			Output(COLDON);//ÖÆÀä
+			Output(COLDON);//åˆ¶å†·
 			break;
 		default:
 			Output(BOTHCLOSE);
@@ -73,12 +73,12 @@ unsigned char Output_led()
 
 void RelayWork_C(unsigned char set)
 {
-	if(s_temp_trend == TEMPSUB)	  //ÎÂ¶È±ä»¯Ç÷ÊÆ ¼õ
+	if(s_temp_trend == TEMPSUB)	  //æ¸©åº¦å˜åŒ–è¶‹åŠ¿ å‡
 	{
 		if(Tmp_C <= set)
 			s_temp_trend = 0;		
 	}
-	else if(s_temp_trend == TEMPADD)//ÎÂ¶È±ä»¯Ç÷ÊÆ ¼Ó
+	else if(s_temp_trend == TEMPADD)//æ¸©åº¦å˜åŒ–è¶‹åŠ¿ åŠ 
 	{
 		if(Tmp_C >= set)
 			s_temp_trend = 0;				
@@ -86,21 +86,21 @@ void RelayWork_C(unsigned char set)
 	else
 	{
 		if(Tmp_C > (set+1))
-			s_temp_trend = TEMPSUB;	//ÎÂ¶È±ä»¯Ç÷ÊÆ ¼õ			
+			s_temp_trend = TEMPSUB;	//æ¸©åº¦å˜åŒ–è¶‹åŠ¿ å‡			
 		else if(Tmp_C < (set-1))
-			s_temp_trend = TEMPADD;	//ÎÂ¶È±ä»¯Ç÷ÊÆ ¼Ó
+			s_temp_trend = TEMPADD;	//æ¸©åº¦å˜åŒ–è¶‹åŠ¿ åŠ 
 		else
 		{}				
 	}
 }
 void RelayWork_H(unsigned char set)
 {
-	if(s_temp_trend == TEMPSUB)	  //ÎÂ¶È±ä»¯Ç÷ÊÆ ¼õ
+	if(s_temp_trend == TEMPSUB)	  //æ¸©åº¦å˜åŒ–è¶‹åŠ¿ å‡
 	{
 		if(Tmp_H <= set)
 			s_temp_trend = 0;		
 	}
-	else if(s_temp_trend == TEMPADD) //ÎÂ¶È±ä»¯Ç÷ÊÆ ¼Ó
+	else if(s_temp_trend == TEMPADD) //æ¸©åº¦å˜åŒ–è¶‹åŠ¿ åŠ 
 	{
 		if(Tmp_H >= set)
 			s_temp_trend = 0;				
@@ -108,30 +108,30 @@ void RelayWork_H(unsigned char set)
 	else
 	{
 		if(Tmp_H > (set+1))					
-			s_temp_trend = TEMPSUB;	//ÎÂ¶È±ä»¯Ç÷ÊÆ ¼õ			
+			s_temp_trend = TEMPSUB;	//æ¸©åº¦å˜åŒ–è¶‹åŠ¿ å‡			
 		else if(Tmp_H < (set-1))
-			s_temp_trend = TEMPADD;	//ÎÂ¶È±ä»¯Ç÷ÊÆ ¼Ó
+			s_temp_trend = TEMPADD;	//æ¸©åº¦å˜åŒ–è¶‹åŠ¿ åŠ 
 		else
 		{}				
 	}
 }
 void Relaywork()
 {
-	/*IO_REL1*/	//ÖÆÈÈ
+	/*IO_REL1*/	//åˆ¶çƒ­
 	bit ftl_closeall=0;
 	unsigned char set;
-	//ÈôÔÚ»ªÊÏ×´Ì¬£¬Ôò×ª»¯³ÉÉãÊÏ£»ÈôÔÚÉãÊÏ×´Ì¬¾ÍÖ±½ÓÓÃ£»
+	//è‹¥åœ¨åæ°çŠ¶æ€ï¼Œåˆ™è½¬åŒ–æˆæ‘„æ°ï¼›è‹¥åœ¨æ‘„æ°çŠ¶æ€å°±ç›´æ¥ç”¨ï¼›
 	if(rsg_show_H)
 		set = TurnToCenti(Settmp);
 	else
 		set = Settmp;
 
 
-	ftl_closeall = ForceClose_lev1();//Ç¿ÖÆ¹Ø±ÕµÈ¼¶×î¸ß
+	ftl_closeall = ForceClose_lev1();//å¼ºåˆ¶å…³é—­ç­‰çº§æœ€é«˜
 
 	if(f_onoff)
 	{
-		if(ftl_closeall) //Ç¿ÖÆ¹Ø
+		if(ftl_closeall) //å¼ºåˆ¶å…³
 		{
 			s_temp_trend = 0;
 		}
@@ -141,7 +141,7 @@ void Relaywork()
 			{}
 			else
 			{
-				if(rsg_show_H)//ÏÔÊ¾»ªÊÏÎÂ¶È
+				if(rsg_show_H)//æ˜¾ç¤ºåæ°æ¸©åº¦
 					RelayWork_H(Settmp);
 				else
 					RelayWork_C(Settmp);	
@@ -176,7 +176,7 @@ void Relaywork()
 
 
    	
-	OutputBf(s_temp_trend);	//¸ù¾İµ±Ç°µÄÎÂ¶ÈÇ÷ÊÆ£¬ÅĞ¶¨ÊÇÖÆÀä»¹ÊÇÖÆÈÈ
+	OutputBf(s_temp_trend);	//æ ¹æ®å½“å‰çš„æ¸©åº¦è¶‹åŠ¿ï¼Œåˆ¤å®šæ˜¯åˆ¶å†·è¿˜æ˜¯åˆ¶çƒ­
 
 
 
