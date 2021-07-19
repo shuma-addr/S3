@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 1   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE KEY
@@ -62,7 +62,7 @@ line level    source
   53          
   54          unsigned char   bdata  keyflag_1;
   55          sbit    shortkeyk1            = keyflag_1 ^0;
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 2   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 2   
 
   56          sbit    shortkeyk2            = keyflag_1 ^1;
   57          sbit    shortkeyk3           = keyflag_1 ^2;
@@ -126,7 +126,7 @@ line level    source
  115   2                      if(Settmp>MIN_H)
  116   2                              Settmp--;
  117   2                      else
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 3   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 3   
 
  118   2                              Settmp=MIN_H;   
  119   2              }
@@ -190,7 +190,7 @@ line level    source
  177   1      //              TouchKeyRestart();                              //启动下一轮转换
  178   1      //      }
  179   1              if(SOCAPI_TouchKeyStatus&0x80)      //重要步骤2:  触摸键扫描一轮标志，是否调用TouchKeyScan()一定要根据此标
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 4   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 4   
 
              -志位置起后
  180   1               {                                                                                                                                              
@@ -254,7 +254,7 @@ line level    source
  238   2      ////                            CloseAllLed();
  239   2      ////                             led_delay=1; 
  240   2      //                              break;
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 5   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 5   
 
  241   2      //                case 0x00000200:  //TK9
  242   2      //                              keyreg=K4_num;
@@ -318,7 +318,7 @@ line level    source
  300   1      //              shortkeyk5=1;
  301   1      //              return;
  302   1      //      }
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 6   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 6   
 
  303   1      }
  304          void keydebouce(void)           //按键消抖
@@ -382,7 +382,7 @@ line level    source
  362   5                                              longkeyk3=1;
  363   5                                              bit_k3_L=1;
  364   5                                      }
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 7   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 7   
 
  365   4                              }
  366   3                              else
@@ -446,7 +446,7 @@ line level    source
  424   3      
  425   3                              if(  (k2_cnt<TOUCH_TIME)  &  (k2_cnt>0)  )
  426   3                                      shortkeyk2=1;
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 8   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 8   
 
  427   3      
  428   3                              if(!bit_k3_L)
@@ -510,7 +510,7 @@ line level    source
  486   1              if(r_K3K4used)
  487   1              {
  488   2                      shortkeyk3=0;
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 9   
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 9   
 
  489   2                      shortkeyk4=0;
  490   2                      cnt_K3K4used++;
@@ -574,7 +574,7 @@ line level    source
  548   2                      if(!f_settemp)
  549   2                              f_settemp=1;
  550   2                      else
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 10  
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 10  
 
  551   2                      {
  552   3                              BuzWork(1);
@@ -638,7 +638,7 @@ line level    source
  610   1      //              shortkeyk9=0;       
  611   1      //      }
  612   1      //      if(shortkeyk10)
-C51 COMPILER V9.00   KEY                                                                   07/17/2021 13:56:31 PAGE 11  
+C51 COMPILER V9.00   KEY                                                                   07/19/2021 09:41:15 PAGE 11  
 
  613   1      //      {
  614   1      //              shortkeyk10=0;

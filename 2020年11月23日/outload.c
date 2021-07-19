@@ -17,7 +17,7 @@
 
 #define CLOSE 0	   //风扇关
 #define HALF 1	  //风扇半功率输出
-#define ALL 123	 //风扇全功率输出
+#define ALL 19	 //风扇全功率输出
 
 
 
